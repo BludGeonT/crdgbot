@@ -1,2 +1,3 @@
 # crdgbot
-Telegram Python Bot For CRDG
+## Telegram Python Bot For CRDG
+**Usage:**
