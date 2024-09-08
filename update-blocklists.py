@@ -6,7 +6,7 @@ from datetime import datetime
 # MySQL connection details
 DB_HOST = "localhost"
 DB_USER = "root"
-DB_PASSWORD = ""
+DB_PASSWORD = "your_mysql_password"
 DB_NAME = "blockfilters"
 
 # Function to connect to MySQL
@@ -48,13 +48,13 @@ def parse_reason(reason):
         print(f"Error parsing reason: {reason} -> {e}")
         return None, None, None, None
 
-# Function to parse the JSON file
+# Function to parse the JSON file and extract the filters
 def parse_json_file(filename):
     with open(filename, 'r') as f:
         data = json.load(f)
-        return data['filters']
+        return data['data']['blocklists']['filters']  # Extract only the 'filters' section
 
-# Main function to process the filters and store in the database
+# Main function to process the filters and store them in the database
 def process_filters(filename):
     filters = parse_json_file(filename)
 
