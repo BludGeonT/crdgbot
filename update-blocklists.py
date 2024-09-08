@@ -36,7 +36,7 @@ def insert_filter(cursor, name, action, date_created, filter_type, info):
 # Updated Function to parse the reason field, keeping everything as strings
 def parse_reason(reason):
     try:
-        # Split the reason into components
+        # Split the reason into components using '|' as the delimiter
         parts = reason.split('|')
         
         # Ensure that the reason contains at least three parts
@@ -45,10 +45,13 @@ def parse_reason(reason):
             return None, None, None, None
 
         # Extract action, date (as string), type, and info
-        action = parts[0].strip('{}')  # {sban} or {skick}
-        date_str = parts[1]  # Keep date as a string (MMDDYYYY format)
-        filter_type = parts[2]  # SPAM, BLANKET, etc.
-        info = parts[3] if len(parts) > 3 else None  # Everything after the last "|"
+        # We will handle action separately to strip the '{}' properly
+        action_part = parts[0]
+        action = action_part.strip('{}').split()[0]  # Action is either sban or skick, without the date
+        
+        date_str = action_part.split()[1]  # Date comes right after the action (MMDDYYYY format)
+        filter_type = parts[1]  # SPAM, BLANKET, etc.
+        info = parts[2] if len(parts) > 2 else None  # Everything after the last "|"
 
         return action, date_str, filter_type, info
     except Exception as e:
