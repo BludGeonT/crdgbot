@@ -2,20 +2,17 @@ import json
 import mysql.connector
 import sys
 from datetime import datetime
+from getpass import getpass  # For securely asking the password
 
-# MySQL connection details
-DB_HOST = "localhost"
-DB_USER = "root"
-DB_PASSWORD = "your_mysql_password"
-DB_NAME = "blockfilters"
-
-# Function to connect to MySQL
+# Function to connect to MySQL, prompting for username and password
 def connect_to_db():
+    db_user = input("Enter MySQL username: ")
+    db_password = getpass("Enter MySQL password: ")
     return mysql.connector.connect(
-        host=DB_HOST,
-        user=DB_USER,
-        password=DB_PASSWORD,
-        database=DB_NAME
+        host="localhost",
+        user=db_user,
+        password=db_password,
+        database="blockfilters"
     )
 
 # Function to insert filter data into the database
