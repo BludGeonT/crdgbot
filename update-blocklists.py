@@ -23,6 +23,9 @@ def insert_filter(cursor, name, action, date_created, filter_type, info):
         print(f"Filter '{name}' already exists. Skipping.")
         return
 
+    # Log the data before insertion
+    print(f"Inserting filter: name={name}, action={action}, date_created={date_created}, type={filter_type}, info={info}")
+    
     # Insert new filter
     cursor.execute("""
         INSERT INTO filters (name, action, date_created, type, info) 
