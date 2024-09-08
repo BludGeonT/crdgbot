@@ -42,22 +42,14 @@ def parse_reason(reason):
             print(f"Invalid reason format: {reason}")
             return None, None, None, None
 
+        # Extract action, date, type, and info
         action = parts[0].strip('{}')  # {sban} or {skick}
+        date_str = parts[1]  # MMDDYYYY format
+        filter_type = parts[2]  # SPAM, BLANKET, etc.
+        info = parts[3] if len(parts) > 3 else None  # Everything after the last "|"
 
-        # Ensure the date part is in the correct format before trying to parse
-        date_str = parts[1]
-        try:
-            date_created = datetime.strptime(date_str, "%m%d%Y").date()
-        except ValueError as e:
-            print(f"Error parsing date in reason: {reason} -> {e}")
-            return None, None, None, None
-
-        filter_type = parts[2]
-
-        # Handle optional info (only present if there's a fourth part)
-        info = parts[3] if len(parts) > 3 else None
-
-        return action, date_created, filter_type, info
+        # Ensure the date part is in the correct format
+        return action, date_str, filter_type, info
     except Exception as e:
         print(f"Error parsing reason: {reason} -> {e}")
         return None, None, None, None
