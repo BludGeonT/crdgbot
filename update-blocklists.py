@@ -1,7 +1,6 @@
 import json
 import mysql.connector
 import sys
-from datetime import datetime
 from getpass import getpass  # For securely asking the password
 
 # Function to connect to MySQL, prompting for username and password
@@ -44,11 +43,10 @@ def parse_reason(reason):
 
         # Extract action, date, type, and info
         action = parts[0].strip('{}')  # {sban} or {skick}
-        date_str = parts[1]  # MMDDYYYY format
+        date_str = parts[1]  # Keep date as a string (MMDDYYYY format)
         filter_type = parts[2]  # SPAM, BLANKET, etc.
         info = parts[3] if len(parts) > 3 else None  # Everything after the last "|"
 
-        # Ensure the date part is in the correct format
         return action, date_str, filter_type, info
     except Exception as e:
         print(f"Error parsing reason: {reason} -> {e}")
