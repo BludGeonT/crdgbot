@@ -31,21 +31,34 @@ def insert_filter(cursor, name, action, date_created, filter_type, info):
     """, (name, action, date_created, filter_type, info))
     print(f"Inserted filter: {name}")
 
-# Function to parse the reason field
+# Updated Function to parse the reason field
 def parse_reason(reason):
     try:
         # Split the reason into components
         parts = reason.split('|')
-        action = parts[0].strip('{}')  # {sban} or {skick}
-        date_str = parts[1]
-        filter_type = parts[2]
-        info = parts[3] if len(parts) > 3 else None
         
-        # Parse the date created (ensure it is a valid date format)
-        date_created = datetime.strptime(date_str, "%m%d%Y").date()
+        # Ensure that the reason contains at least three parts
+        if len(parts) < 3:
+            print(f"Invalid reason format: {reason}")
+            return None, None, None, None
+
+        action = parts[0].strip('{}')  # {sban} or {skick}
+
+        # Ensure the date part is in the correct format before trying to parse
+        date_str = parts[1]
+        try:
+            date_created = datetime.strptime(date_str, "%m%d%Y").date()
+        except ValueError as e:
+            print(f"Error parsing date in reason: {reason} -> {e}")
+            return None, None, None, None
+
+        filter_type = parts[2]
+
+        # Handle optional info (only present if there's a fourth part)
+        info = parts[3] if len(parts) > 3 else None
 
         return action, date_created, filter_type, info
-    except ValueError as e:
+    except Exception as e:
         print(f"Error parsing reason: {reason} -> {e}")
         return None, None, None, None
 
