@@ -37,11 +37,15 @@ def parse_reason(reason):
         # Split the reason into components
         parts = reason.split('|')
         action = parts[0].strip('{}')  # {sban} or {skick}
-        date_created = datetime.strptime(parts[1], "%m%d%Y").date()  # Date in MMDDYYYY format
+        date_str = parts[1]
         filter_type = parts[2]
         info = parts[3] if len(parts) > 3 else None
+        
+        # Parse the date created (ensure it is a valid date format)
+        date_created = datetime.strptime(date_str, "%m%d%Y").date()
+
         return action, date_created, filter_type, info
-    except Exception as e:
+    except ValueError as e:
         print(f"Error parsing reason: {reason} -> {e}")
         return None, None, None, None
 
