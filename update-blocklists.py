@@ -30,7 +30,7 @@ def insert_filter(cursor, name, action, date_created, filter_type, info):
     """, (name, action, date_created, filter_type, info))
     print(f"Inserted filter: {name}")
 
-# Updated Function to parse the reason field
+# Updated Function to parse the reason field, keeping everything as strings
 def parse_reason(reason):
     try:
         # Split the reason into components
@@ -41,7 +41,7 @@ def parse_reason(reason):
             print(f"Invalid reason format: {reason}")
             return None, None, None, None
 
-        # Extract action, date, type, and info
+        # Extract action, date (as string), type, and info
         action = parts[0].strip('{}')  # {sban} or {skick}
         date_str = parts[1]  # Keep date as a string (MMDDYYYY format)
         filter_type = parts[2]  # SPAM, BLANKET, etc.
