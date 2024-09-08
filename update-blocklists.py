@@ -71,7 +71,7 @@ def process_filters(filename):
         if action and date_created and filter_type:
             insert_filter(cursor, name, action, date_created, filter_type, info)
 
-    # Commit and close the connection
+    # Commit and close the connections 
     db.commit()
     cursor.close()
     db.close()
