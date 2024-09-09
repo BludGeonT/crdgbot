@@ -58,11 +58,11 @@ def increment_times_used(triggered_value):
     cursor.close()
     db.close()
 
-# Function to handle incoming messages and log the full message object
+# Function to handle incoming messages and log the full update object
 def handle_message(update: Update, context: CallbackContext):
-    # Log the full update object to understand the structure
-    logger.info(f"Full message object: {update.message}")
-
+    # Log the entire update object
+    logger.info(f"Full update object: {update}")
+    
     if update.message and update.message.text:
         message_text = update.message.text
         username = update.message.from_user.username
