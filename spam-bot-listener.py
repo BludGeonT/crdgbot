@@ -5,6 +5,12 @@ from telegram.ext import Updater, MessageHandler, Filters, CallbackContext
 import config  # Assuming config contains your bot token
 import re
 
+# Enable logging for verbosity
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
+)
+logger = logging.getLogger(__name__)
+
 # Set the channel ID within the script
 CHANNEL_ID = input("Enter the Telegram channel ID: ")
 
@@ -27,9 +33,9 @@ def increment_times_used(triggered_value):
     # Update the times_used value for the matching name
     cursor.execute("UPDATE filters SET times_used = times_used + 1 WHERE name = %s", (triggered_value,))
     if cursor.rowcount == 0:
-        print(f"No filter found for triggered value: {triggered_value}")
+        logger.info(f"No filter found for triggered value: {triggered_value}")
     else:
-        print(f"Incremented times_used for {triggered_value}")
+        logger.info(f"Incremented times_used for {triggered_value}")
 
     db.commit()
     cursor.close()
@@ -39,16 +45,20 @@ def increment_times_used(triggered_value):
 def handle_message(update: Update, context: CallbackContext):
     message_text = update.message.text
     username = update.message.from_user.username
-    print(f"Received message from {username}: {message_text}")
+    chat_id = update.message.chat_id
+    logger.info(f"Received message from {username} in chat {chat_id}: {message_text}")
 
-    # Check if the message contains 'triggered:'
-    match = re.search(r'triggered:\s*(.+)', message_text, re.IGNORECASE)
-    if match:
-        triggered_value = match.group(1).strip()
-        print(f"Detected triggered value: {triggered_value}")
-        
-        # Increment the times_used field in the database
-        increment_times_used(triggered_value)
+    # Check if the message contains 'triggered:' and if it's from the correct channel
+    if chat_id == int(CHANNEL_ID):
+        match = re.search(r'triggered:\s*(.+)', message_text, re.IGNORECASE)
+        if match:
+            triggered_value = match.group(1).strip()
+            logger.info(f"Detected triggered value: {triggered_value}")
+            
+            # Increment the times_used field in the database
+            increment_times_used(triggered_value)
+    else:
+        logger.info(f"Ignored message from chat {chat_id} (not the target channel)")
 
 # Main function to run the bot
 def main():
@@ -56,15 +66,15 @@ def main():
     updater = Updater(token=config.TELEGRAM_BOT_API_KEY, use_context=True)
     dispatcher = updater.dispatcher
 
-    # Only process messages from the specified channel
-    def channel_filter(update):
-        return update.message.chat_id == int(CHANNEL_ID)
-
-    # Add handler for text messages from the specified channel
-    dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command & channel_filter, handle_message))
+    logger.info(f"Connecting to Telegram channel ID: {CHANNEL_ID}")
+    
+    # Add handler for text messages
+    dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, handle_message))
 
     # Start polling for messages
     updater.start_polling()
+    logger.info("Bot started and listening for messages...")
+    
     updater.idle()
 
 if __name__ == '__main__':
