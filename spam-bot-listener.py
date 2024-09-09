@@ -2,7 +2,7 @@ import logging
 import mysql.connector
 from telegram import Update
 from telegram.ext import Updater, MessageHandler, Filters, CallbackContext
-import config-surveyor  # Assuming config contains your bot token
+import config_surveyor  # Assuming config contains your bot token
 import re
 
 # Enable logging for verbosity
