@@ -60,14 +60,14 @@ def increment_times_used(triggered_value):
 
 # Function to handle incoming messages and log the full update object
 def handle_message(update: Update, context: CallbackContext):
-    # Log the entire update object
+    # Log the entire update object to understand the structure
     logger.info(f"Full update object: {update}")
     
-    if update.message and update.message.text:
-        message_text = update.message.text
-        username = update.message.from_user.username
-        chat_id = update.message.chat_id
-        logger.info(f"Received message from {username} in chat {chat_id}: {message_text}")
+    # Check if it's a channel post and extract the message from there
+    if update.channel_post and update.channel_post.text:
+        message_text = update.channel_post.text
+        chat_id = update.channel_post.chat.id
+        logger.info(f"Received channel post in chat {chat_id}: {message_text}")
 
         # Check if the message contains 'Triggered:' (case-insensitive) and if it's from the correct channel
         if chat_id == int(CHANNEL_ID):
@@ -83,9 +83,9 @@ def handle_message(update: Update, context: CallbackContext):
                 # Increment the times_used field in the database
                 increment_times_used(cleaned_triggered_value)
             else:
-                logger.info(f"Message from {username} did not contain 'Triggered:'")
+                logger.info(f"Channel post did not contain 'Triggered:'")
         else:
-            logger.info(f"Ignored message from chat {chat_id} (not the target channel)")
+            logger.info(f"Ignored channel post from chat {chat_id} (not the target channel)")
     else:
         logger.info("Received a non-text message or empty message. Skipping.")
 
@@ -97,7 +97,7 @@ def main():
 
     logger.info(f"Connecting to Telegram channel ID: {CHANNEL_ID}")
     
-    # Add handler for all messages
+    # Add handler for all messages and channel posts
     dispatcher.add_handler(MessageHandler(Filters.all & ~Filters.command, handle_message))
 
     # Start polling for messages
