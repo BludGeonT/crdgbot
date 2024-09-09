@@ -28,10 +28,10 @@ def connect_to_db():
         database="blockfilters"
     )
 
-# Function to clean up the triggered value by removing special characters
+# Function to clean up the triggered value while preserving / and *
 def clean_triggered_value(triggered_value):
-    # Remove any non-alphanumeric characters, except for dots and dashes
-    cleaned_value = re.sub(r'[^a-zA-Z0-9.-]', '', triggered_value)
+    # Allow only alphanumeric characters, dots, dashes, slashes, and asterisks
+    cleaned_value = re.sub(r'[^a-zA-Z0-9./*-]', '', triggered_value)
     return cleaned_value
 
 # Function to increment 'times_used' in the database and show before/after values
@@ -79,7 +79,7 @@ def handle_message(update: Update, context: CallbackContext):
                 triggered_value = match.group(1).strip()
                 logger.info(f"Detected triggered value before cleaning: {triggered_value}")
                 
-                # Clean the triggered value by removing special characters
+                # Clean the triggered value but retain / and *
                 cleaned_triggered_value = clean_triggered_value(triggered_value)
                 logger.info(f"Cleaned triggered value: {cleaned_triggered_value}")
                 
