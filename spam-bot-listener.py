@@ -2,7 +2,7 @@ import logging
 import mysql.connector
 from telegram import Update
 from telegram.ext import Updater, MessageHandler, Filters, CallbackContext
-import config_surveyor  # Assuming config contains your bot token
+import config_surveyor  # Assuming config_surveyor contains your bot token
 import re
 
 # Enable logging for verbosity
@@ -63,7 +63,7 @@ def handle_message(update: Update, context: CallbackContext):
 # Main function to run the bot
 def main():
     # Set up the Telegram bot
-    updater = Updater(token=config.TELEGRAM_BOT_API_KEY, use_context=True)
+    updater = Updater(token=config_surveyor.TELEGRAM_BOT_API_KEY, use_context=True)
     dispatcher = updater.dispatcher
 
     logger.info(f"Connecting to Telegram channel ID: {CHANNEL_ID}")
