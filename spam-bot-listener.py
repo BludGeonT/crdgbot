@@ -25,19 +25,30 @@ def connect_to_db():
         database="blockfilters"
     )
 
-# Function to increment 'times_used' in the database
+# Function to increment 'times_used' in the database and show before/after values
 def increment_times_used(triggered_value):
     db = connect_to_db()
     cursor = db.cursor()
 
-    # Update the times_used value for the matching name
-    cursor.execute("UPDATE filters SET times_used = times_used + 1 WHERE name = %s", (triggered_value,))
-    if cursor.rowcount == 0:
-        logger.info(f"No filter found for triggered value: {triggered_value}")
-    else:
-        logger.info(f"Incremented times_used for {triggered_value}")
+    # Fetch the current times_used value
+    cursor.execute("SELECT times_used FROM filters WHERE name = %s", (triggered_value,))
+    result = cursor.fetchone()
 
-    db.commit()
+    if result:
+        times_used_before = result[0]
+        logger.info(f"Before increment: {triggered_value} has been triggered {times_used_before} times.")
+
+        # Increment the times_used value
+        cursor.execute("UPDATE filters SET times_used = times_used + 1 WHERE name = %s", (triggered_value,))
+        db.commit()
+
+        # Fetch the updated times_used value
+        cursor.execute("SELECT times_used FROM filters WHERE name = %s", (triggered_value,))
+        times_used_after = cursor.fetchone()[0]
+        logger.info(f"After increment: {triggered_value} has been triggered {times_used_after} times.")
+    else:
+        logger.info(f"No filter found for triggered value: {triggered_value}")
+
     cursor.close()
     db.close()
 
@@ -48,7 +59,7 @@ def handle_message(update: Update, context: CallbackContext):
     chat_id = update.message.chat_id
     logger.info(f"Received message from {username} in chat {chat_id}: {message_text}")
 
-    # Check if the message contains 'triggered:' and if it's from the correct channel
+    # Check if the message contains 'Triggered:' (case-insensitive) and if it's from the correct channel
     if chat_id == int(CHANNEL_ID):
         match = re.search(r'triggered:\s*(.+)', message_text, re.IGNORECASE)
         if match:
@@ -57,6 +68,8 @@ def handle_message(update: Update, context: CallbackContext):
             
             # Increment the times_used field in the database
             increment_times_used(triggered_value)
+        else:
+            logger.info(f"Message from {username} did not contain 'Triggered:'")
     else:
         logger.info(f"Ignored message from chat {chat_id} (not the target channel)")
 
@@ -68,8 +81,8 @@ def main():
 
     logger.info(f"Connecting to Telegram channel ID: {CHANNEL_ID}")
     
-    # Add handler for text messages
-    dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, handle_message))
+    # Add handler for all messages
+    dispatcher.add_handler(MessageHandler(Filters.all & ~Filters.command, handle_message))
 
     # Start polling for messages
     updater.start_polling()
