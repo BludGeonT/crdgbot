@@ -4,6 +4,7 @@ from telegram import Update
 from telegram.ext import Updater, MessageHandler, Filters, CallbackContext
 import config_surveyor  # Assuming config_surveyor contains your bot token
 import re
+from getpass import getpass
 
 # Enable logging for verbosity
 logging.basicConfig(
@@ -14,10 +15,12 @@ logger = logging.getLogger(__name__)
 # Set the channel ID within the script
 CHANNEL_ID = input("Enter the Telegram channel ID: ")
 
-# Function to connect to MySQL
+# Prompt for MySQL credentials once
+db_user = input("Enter MySQL username: ")
+db_password = getpass("Enter MySQL password: ")
+
+# Function to connect to MySQL (credentials cached)
 def connect_to_db():
-    db_user = input("Enter MySQL username: ")
-    db_password = getpass("Enter MySQL password: ")
     return mysql.connector.connect(
         host="localhost",
         user=db_user,
@@ -58,7 +61,7 @@ def increment_times_used(triggered_value):
     cursor.close()
     db.close()
 
-# Function to handle incoming messages and log the full update object
+# Function to handle incoming messages and check 'Triggered:' in channel posts
 def handle_message(update: Update, context: CallbackContext):
     # Log the entire update object to understand the structure
     logger.info(f"Full update object: {update}")
