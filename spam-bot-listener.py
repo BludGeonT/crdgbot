@@ -25,6 +25,12 @@ def connect_to_db():
         database="blockfilters"
     )
 
+# Function to clean up the triggered value by removing special characters
+def clean_triggered_value(triggered_value):
+    # Remove any non-alphanumeric characters, except for dots and dashes
+    cleaned_value = re.sub(r'[^a-zA-Z0-9.-]', '', triggered_value)
+    return cleaned_value
+
 # Function to increment 'times_used' in the database and show before/after values
 def increment_times_used(triggered_value):
     db = connect_to_db()
@@ -54,24 +60,31 @@ def increment_times_used(triggered_value):
 
 # Function to handle incoming messages and look for 'triggered:'
 def handle_message(update: Update, context: CallbackContext):
-    message_text = update.message.text
-    username = update.message.from_user.username
-    chat_id = update.message.chat_id
-    logger.info(f"Received message from {username} in chat {chat_id}: {message_text}")
+    if update.message and update.message.text:
+        message_text = update.message.text
+        username = update.message.from_user.username
+        chat_id = update.message.chat_id
+        logger.info(f"Received message from {username} in chat {chat_id}: {message_text}")
 
-    # Check if the message contains 'Triggered:' (case-insensitive) and if it's from the correct channel
-    if chat_id == int(CHANNEL_ID):
-        match = re.search(r'triggered:\s*(.+)', message_text, re.IGNORECASE)
-        if match:
-            triggered_value = match.group(1).strip()
-            logger.info(f"Detected triggered value: {triggered_value}")
-            
-            # Increment the times_used field in the database
-            increment_times_used(triggered_value)
+        # Check if the message contains 'Triggered:' (case-insensitive) and if it's from the correct channel
+        if chat_id == int(CHANNEL_ID):
+            match = re.search(r'triggered:\s*(.+)', message_text, re.IGNORECASE)
+            if match:
+                triggered_value = match.group(1).strip()
+                logger.info(f"Detected triggered value before cleaning: {triggered_value}")
+                
+                # Clean the triggered value by removing special characters
+                cleaned_triggered_value = clean_triggered_value(triggered_value)
+                logger.info(f"Cleaned triggered value: {cleaned_triggered_value}")
+                
+                # Increment the times_used field in the database
+                increment_times_used(cleaned_triggered_value)
+            else:
+                logger.info(f"Message from {username} did not contain 'Triggered:'")
         else:
-            logger.info(f"Message from {username} did not contain 'Triggered:'")
+            logger.info(f"Ignored message from chat {chat_id} (not the target channel)")
     else:
-        logger.info(f"Ignored message from chat {chat_id} (not the target channel)")
+        logger.info("Received a non-text message or empty message. Skipping.")
 
 # Main function to run the bot
 def main():
